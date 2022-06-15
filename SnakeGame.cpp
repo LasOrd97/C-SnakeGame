@@ -96,8 +96,6 @@ void drawSnake() {
 //  5, 6 : Item - Gate
 void initSnakeBoard() {
     snakeBoard = new int* [snakeBoardY];
-    int addGate1, addGate2;
-    int countWall = 0; //Gate 랜덤난수를 이용하기 위한 벽의 개수 변수 추가
     for (int i = 0; i < snakeBoardY; i++) {
         snakeBoard[i] = new int[snakeBoardX];
         for (int j = 0; j < snakeBoardX; j++) {
@@ -105,15 +103,87 @@ void initSnakeBoard() {
                 snakeBoard[i][j] = -2;
             else if (i == 0 || j == 0 || i == snakeBoardY - 1 || j == snakeBoardX - 1) {
                 snakeBoard[i][j] = -1;
-                countWall++;
             }
             else
                 snakeBoard[i][j] = 0;
         }
     }
+}
 
+//stage별 벽 추가
+//  1 : 추가없음
+//  2 : 중앙 세로벽 1개
+//  3 : 중앙 십자벽 1개
+//  4 : 중앙 십자벽 1개 + 상하단 벽 각 2개 (총 5개)
+//  5 : 중앙 십자벽 1개 + 맵 축소
+void addStageWall(int stage) {
+    if (stage < 2) return;
+    for (int i = 0; i < 5; i++) {
+        snakeBoard[snakeBoardY / 2 - i][snakeBoardX / 2] = -1;
+        snakeBoard[snakeBoardY / 2 + i][snakeBoardX / 2] = -1;
+        if (stage > 2) {
+            snakeBoard[snakeBoardY / 2][snakeBoardX / 2 - i] = -1;
+            snakeBoard[snakeBoardY / 2][snakeBoardX / 2 + i] = -1;
+        }
+        if (stage > 3) {
+            snakeBoard[1 + i][9] = -1;
+            snakeBoard[1 + i][snakeBoardX - 10] = -1;
+            snakeBoard[snakeBoardY - 2 - i][9] = -1;
+            snakeBoard[snakeBoardY - 2 - i][snakeBoardX - 10] = -1;
+        }
+    }
+    if (stage > 4) {
+        for (int i = 0; i < snakeBoardY; i++) {
+            for (int j = 0; j < 10; j++) {
+                snakeBoard[i][j] = -1;
+                snakeBoard[i][snakeBoardX - 1 - j] = -1;
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < snakeBoardX; j++) {
+                snakeBoard[i][j] = -1;
+                snakeBoard[snakeBoardY - 1 - i][j] = -1;
+            }
+        }
+    }
+}
 
+//ImmuneWall 설정 메서드 추가(아직 시행해보지 않음)
+void setImmuneWall() {
+    for (int i = 0; i < snakeBoardY; i++) {
+        for (int j = 0; j < snakeBoardX; j++) {
+            if (i == 0) {
+                if (snakeBoard[i][j] <= -1 && snakeBoard[i + 1][j] <= -1)
+                    snakeBoard[i][j] = -2;
+            }
+            else if (j == 0) {
+                if (snakeBoard[i][j] <= -1 && snakeBoard[i][j + 1] <= -1)
+                    snakeBoard[i][j] = -2;
+            }
+            else if (i == snakeBoardY - 1) {
+                if (snakeBoard[i][j] <= -1 && snakeBoard[i - 1][j] <= -1)
+                    snakeBoard[i][j] = -2;
+            }
+            else if (j == snakeBoardX - 1) {
+                if (snakeBoard[i][j] <= -1 && snakeBoard[i][j - 1] <= -1)
+                    snakeBoard[i][j] = -2;
+            }
+            else if (snakeBoard[i][j] <= -1 && snakeBoard[i - 1][j] <= -1 && snakeBoard[i + 1][j] <= -1 && snakeBoard[i][j - 1] <= -1 && snakeBoard[i][j + 1] <= -1)
+                snakeBoard[i][j] = -2;
+        }
+    }
+}
+
+void setGate() {
     //랜덤난수를 이용한 Gate 생성
+    int addGate1, addGate2;
+    int countWall = 0; //Gate 랜덤난수를 이용하기 위한 벽의 개수 변수 추가
+    for (int i = 0; i < snakeBoardY; i++) {
+        for (int j = 0; j < snakeBoardX; j++) {
+            if (snakeBoard[i][j] == - 1)
+                countWall++;
+        }
+    }
     do {
         addGate1 = getRandomNumber(countWall - 1);
         addGate2 = getRandomNumber(countWall - 1);
@@ -145,32 +215,6 @@ void initSnakeBoard() {
                 addGate2--;
             else
                 continue;
-        }
-    }
-}
-
-//ImmuneWall 설정 메서드 추가(아직 시행해보지 않음)
-void setImmuneWall() {
-    for (int i = 0; i < snakeBoardY; i++) {
-        for (int j = 0; j < snakeBoardX; j++) {
-            if (i == 0 || j == 0 || i == snakeBoardY - 1 || j == snakeBoardX - 1) {
-                if (snakeBoard[i][j] <= -1 && snakeBoard[i + 1][j] <= -1)
-                    snakeBoard[i][j] = -2;
-            }
-            else if (j == 0) {
-                if (snakeBoard[i][j] <= -1 && snakeBoard[i][j + 1] <= -1)
-                    snakeBoard[i][j] = -2;
-            }
-            else if (i == snakeBoardY - 1) {
-                if (snakeBoard[i][j] <= -1 && snakeBoard[i - 1][j] <= -1)
-                    snakeBoard[i][j] = -2;
-            }
-            else if (j == snakeBoardX - 1) {
-                if (snakeBoard[i][j] <= -1 && snakeBoard[i][j - 1] <= -1)
-                    snakeBoard[i][j] = -2;
-            }
-            else if (snakeBoard[i][j] <= -1 && snakeBoard[i - 1][j] <= -1 && snakeBoard[i + 1][j] <= -1 && snakeBoard[i][j - 1] <= -1 && snakeBoard[i][j + 1] <= -1)
-                snakeBoard[i][j] = -2;
         }
     }
 }
@@ -403,40 +447,67 @@ int main()
     snakeWin = newwin(21, 47, 3, 2);
     wbkgd(snakeWin, COLOR_PAIR(1));
     wattron(snakeWin, COLOR_PAIR(1));
-    mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Press space to start...");
-    wrefresh(snakeWin);
-    getchar();
-    mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "                         ");
 
-    int i = 0;
-    int tic = 0;
-    setKey(2); // setKey로 변경
-    initSnakeBoard();
-    initSnake();
+    bool isFail = false;
 
-    addItem(3, 10, 1);
-    addItem(5, 10, 1);
-    addItem(7, 10, 1);
-    addItem(9, 10, -1);
+    for (int stage = 1; stage < 6; stage++) {
+        if (stage == 3) ticUnit = 250;  //3단계부터 속도 2배 증가
+        mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Press space to start...");
+        wrefresh(snakeWin);
+        getchar();
 
-    while (1) {
-        Sleep(timeUnit);
-        key = keyState(key);
-        if (key < 0) break; //반대방향 입력 or esc 입력시 종료
-        if (isConflict(key)) break;  //벽 or 꼬리 충돌시 종료
-        if (snakeLength < 3) break; //길이 2 이하시 종료
-       
+        int i = 0;
+        int tic = 0;
+        setKey(2);
+        initSnakeBoard();
+        addStageWall(stage);
+        setImmuneWall();
+        setGate();
+        initSnake();
 
-        if (tic >= ticUnit) {
-            moveSnake(key, checkItem(key), enterGate(key, gate1X, gate1Y, gate2X, gate2Y)); //Gate 추가
-            printSnakeBoard(snakeWin);
-            tic = 0;
+        addItem(4, 10, 1);
+        addItem(5, 10, 1);
+        addItem(7, 10, 1);
+        addItem(7, 13, 1);
+        addItem(7, 15, 1);
+        addItem(11, 10, -1);
+
+        while (1) {
+            Sleep(timeUnit);
+            key = keyState(key);
+            if (key < 0) {
+                isFail = true;
+                break; //반대방향 입력 or esc 입력시 종료
+            }
+
+            if (tic >= ticUnit) {
+                if (isConflict(key)) {
+                    isFail = true;
+                    break;  //벽 or 꼬리 충돌시 종료
+                }
+                if (snakeLength < 3) {
+                    isFail = true;
+                    break;  //길이 2 이하시 종료
+                }
+                moveSnake(key, checkItem(key), enterGate(key, gate1X, gate1Y, gate2X, gate2Y));
+                printSnakeBoard(snakeWin);
+                tic = 0;
+            }
+
+            i++;
+            tic += timeUnit;
+            if (snakeLength > 7) break;
         }
-        i++;
-        tic += timeUnit;
+        if (isFail) break;
+        mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Success!!");
+        wrefresh(snakeWin);
+        getchar();
     }
 
-    mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Fail...");
+    if (isFail)
+        mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Fail...");
+    else
+        mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "All Clear!!");
     wrefresh(snakeWin);
     getchar();
 
