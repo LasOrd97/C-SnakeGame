@@ -19,7 +19,6 @@ int maxSnakeLength = snakeBoardX * snakeBoardY; //snake 최대길이
 int** snakeBoard, ** snake;
 int snakeLength = 0;    //현재 snake 길이
 int gate1X, gate1Y, gate2X, gate2Y; // 2개의 Gate 좌표변수 추가
-
 // setKey 추가
 void setKey(int setKey) {
     key = setKey;
@@ -428,12 +427,21 @@ void printSnakeBoard(WINDOW* win) {
 
     wrefresh(win);
 }
+void printScore(int stage, int score) {
+    string stringStage, stringScore;
+    stringStage = to_string(stage);
+    stringScore = to_string(score);
+    mvprintw(7, 65, stringStage.c_str());
+    mvprintw(15, 65, stringScore.c_str());
+    refresh();
+}
+
 
 int main()
 {
     WINDOW* snakeWin;
     initscr();
-    resize_term(25, 52);
+    resize_term(25, 82);
     keypad(stdscr, TRUE);
     curs_set(0);
     noecho();
@@ -441,6 +449,9 @@ int main()
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     border('*', '*', '*', '*', '*', '*', '*', '*');
     mvprintw(1, 1, "Snake Game");
+    mvprintw(7, 55, "Stage : ");
+    mvprintw(11, 55, "Require : 5");
+    mvprintw(15, 55, "Score : ");
     refresh();
 
 
@@ -457,7 +468,7 @@ int main()
         getchar();
 
         int i = 0;
-        int tic = 0;
+        int tic = 0;       
         setKey(2);
         initSnakeBoard();
         addStageWall(stage);
@@ -471,7 +482,6 @@ int main()
         addItem(7, 13, 1);
         addItem(7, 15, 1);
         addItem(11, 10, -1);
-
         while (1) {
             Sleep(timeUnit);
             key = keyState(key);
@@ -491,6 +501,9 @@ int main()
                 }
                 moveSnake(key, checkItem(key), enterGate(key, gate1X, gate1Y, gate2X, gate2Y));
                 printSnakeBoard(snakeWin);
+                printScore(stage, snakeLength - 3);
+                
+                
                 tic = 0;
             }
 
@@ -513,7 +526,6 @@ int main()
 
     delwin(snakeWin);
     endwin();
-
 
     return 0;
 }
