@@ -1,4 +1,4 @@
-# C-SnakeGame
+# C++SnakeGame
 
 key 변수 선언위치 변경
 
