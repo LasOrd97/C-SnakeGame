@@ -173,6 +173,22 @@ void setImmuneWall() {
     }
 }
 
+// 아이템 랜덤 출현
+void locateItem(int x) {
+    int itemY, itemX, poisonY, poisonX;
+    for (int m = 0; m < snakeBoardY; m++) {
+        for (int n = 0; n < snakeBoardX; n++) {
+            if (snakeBoard[m][n] == x)
+                snakeBoard[m][n] = 0;
+        }
+    }
+    do {
+        itemY = getRandomNumber(18);
+        itemX = getRandomNumber(42);
+    } while (snakeBoard[itemY][itemX] != 0);
+    snakeBoard[itemY][itemX] = x;
+}
+
 void setGate() {
     //랜덤난수를 이용한 Gate 생성
     int addGate1, addGate2;
@@ -289,10 +305,12 @@ void moveSnake(int key, int status, int enterGate) {
             snake[snakeLength][1] = tempX;
             snake[snakeLength + 1] = NULL;
             snakeLength++;
+            locateItem(3); // 아이템 습득 후 재배치
         }
         else if (status == -1 && snakeLength > 1) { //길이 감소
             snake[snakeLength - 1] = NULL;
             snakeLength--;
+            locateItem(4); // 아이템 습득 후 재배치
         }
     }
 
@@ -320,15 +338,6 @@ void addItem(int y, int x, int type) {
         snakeBoard[y][x] = 3;
     else if (type == -1)
         snakeBoard[y][x] = 4;
-}
-
-void locateItem(int x) {
-    int itemY, itemX;
-    do{
-    itemY = getRandomNumber(18);
-    itemX = getRandomNumber(42);
-    } while (snakeBoard[itemY][itemX] != 0);
-    addItem(itemY, itemX, x);
 }
 
 //진행 위치(다음 칸)의 item 확인
@@ -487,24 +496,18 @@ int main()
         setImmuneWall();
         setGate();
         initSnake();
+        locateItem(3);
+        locateItem(4);
 
-        locateItem(1);
-        locateItem(1);
-        locateItem(1);
-        locateItem(1);
-        locateItem(1);
-        locateItem(1);
-        locateItem(-1);
-        locateItem(-1);
-        locateItem(-1);
         while (1) {
             Sleep(timeUnit);
             key = keyState(key);
 
-            if (i % 250 == 249) {
-                locateItem(1);
-                locateItem(-1);
-            }
+            // 일정 시간 이후 아이템 재배치
+            if (i % 500 == 499)
+                locateItem(3);
+            if (i % 400 == 399)
+                locateItem(4);
 
             if (key < 0) {
                 isFail = true;
@@ -529,7 +532,7 @@ int main()
             i++;
             
             tic += timeUnit;
-            if (snakeLength > 6 + stage) break;
+            if (snakeLength > 6 + stage) break; // 미션 수정 (요구점수 5 -> 4 + stage)
         }
         if (isFail) break;
         mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Success!!");
