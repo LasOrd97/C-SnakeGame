@@ -322,6 +322,15 @@ void addItem(int y, int x, int type) {
         snakeBoard[y][x] = 4;
 }
 
+void locateItem(int x) {
+    int itemY, itemX;
+    do{
+    itemY = getRandomNumber(18);
+    itemX = getRandomNumber(42);
+    } while (snakeBoard[itemY][itemX] != 0);
+    addItem(itemY, itemX, x);
+}
+
 //진행 위치(다음 칸)의 item 확인
 //type 1 : Growth
 //type -1 : Poison
@@ -427,11 +436,14 @@ void printSnakeBoard(WINDOW* win) {
 
     wrefresh(win);
 }
+// 점수판 출력
 void printScore(int stage, int score) {
-    string stringStage, stringScore;
+    string stringStage, stringScore, stringRequire;
     stringStage = to_string(stage);
+    stringRequire = to_string(stage + 4);
     stringScore = to_string(score);
     mvprintw(7, 65, stringStage.c_str());
+    mvprintw(11, 65, stringRequire.c_str());
     mvprintw(15, 65, stringScore.c_str());
     refresh();
 }
@@ -450,7 +462,7 @@ int main()
     border('*', '*', '*', '*', '*', '*', '*', '*');
     mvprintw(1, 1, "Snake Game");
     mvprintw(7, 55, "Stage : ");
-    mvprintw(11, 55, "Require : 5");
+    mvprintw(11, 55, "Require : ");
     mvprintw(15, 55, "Score : ");
     refresh();
 
@@ -476,15 +488,24 @@ int main()
         setGate();
         initSnake();
 
-        addItem(4, 10, 1);
-        addItem(5, 10, 1);
-        addItem(7, 10, 1);
-        addItem(7, 13, 1);
-        addItem(7, 15, 1);
-        addItem(11, 10, -1);
+        locateItem(1);
+        locateItem(1);
+        locateItem(1);
+        locateItem(1);
+        locateItem(1);
+        locateItem(1);
+        locateItem(-1);
+        locateItem(-1);
+        locateItem(-1);
         while (1) {
             Sleep(timeUnit);
             key = keyState(key);
+
+            if (i % 250 == 249) {
+                locateItem(1);
+                locateItem(-1);
+            }
+
             if (key < 0) {
                 isFail = true;
                 break; //반대방향 입력 or esc 입력시 종료
@@ -502,14 +523,13 @@ int main()
                 moveSnake(key, checkItem(key), enterGate(key, gate1X, gate1Y, gate2X, gate2Y));
                 printSnakeBoard(snakeWin);
                 printScore(stage, snakeLength - 3);
-                
-                
                 tic = 0;
             }
 
             i++;
+            
             tic += timeUnit;
-            if (snakeLength > 7) break;
+            if (snakeLength > 6 + stage) break;
         }
         if (isFail) break;
         mvwprintw(snakeWin, snakeBoardY / 2 - 1, 2, "Success!!");
